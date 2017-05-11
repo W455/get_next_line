@@ -6,7 +6,7 @@
 /*   By: oukrifa <oukrifa@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/06 18:14:58 by oukrifa           #+#    #+#             */
-/*   Updated: 2017/05/06 23:20:50 by oukrifa          ###   ########.fr       */
+/*   Updated: 2017/05/11 16:23:18 by oukrifa          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,69 +25,68 @@ static char			*ft_strjoinandfree(char *s1, char *s2)
 	return (str);
 }
 
-static t_gnl		ft_realloc(int const fd, t_gnl gnl)
+static t_gnl		ft_read(int const fd, t_gnl gnl)
 {
 	if (gnl.i == gnl.size)
 	{
 		gnl.i = 0;
-		if (!gnl.buff)
-			if (!(gnl.buff = (char*)malloc(sizeof(*gnl.buff) * BUFF_SIZE)))
-				gnl.i = FAILURE;
 		if ((gnl.size = read(fd, gnl.buff, BUFF_SIZE)) == FAILURE)
 			gnl.i = FAILURE;
+		else
+			gnl.buff[gnl.size] = '\0';
 	}
 	return (gnl);
 }
 
-static int			read_line(char **line, t_gnl gnl)
+static int			build_line(char **line, t_gnl gnl, char offset)
 {
-	int				i;
+	int				index;
 	char			*save;
 
-	i = 0;
-	if (!(save = ft_strnew(BUFF_SIZE)))
+	index = 0;
+	if (!(save = ft_strnew(gnl.size + 1)))
 		return (FAILURE);
 	while (gnl.i < gnl.size)
 	{
-		if (gnl.buff[gnl.i] == '\n')
-		{
-			*line = ft_strjoinandfree(*line, save);
+		if (gnl.buff[gnl.i] == offset
+						&& (*line = ft_strjoinandfree(*line, save)))
 			return (gnl.i);
-		}
-		save[i] = gnl.buff[gnl.i];
-		++i;
-		++gnl.i;
-		if (gnl.i == gnl.size)
-		{
-			*line = ft_strjoinandfree(*line, save);
+		save[index++] = gnl.buff[gnl.i++];
+		if (gnl.i == gnl.size && (*line = ft_strjoinandfree(*line, save)))
 			return (gnl.i);
-		}
+		if (!*line)
+			return ((gnl.i = FAILURE));
 	}
 	return (gnl.i);
 }
 
-int					get_next_line(int const fd, char **line)
+int					get_next_offset(int const fd, char **line, char offset)
 {
-	static t_gnl	gnl[MAX_FD];
+	static t_gnl	gno[MAX_FD];
 
-	if (!line || fd < 0)
+	if (!line || fd < 0 || fd >= MAX_FD)
 		return (FAILURE);
-	gnl[fd] = ft_realloc(fd, gnl[fd]);
-	if (gnl[fd].i == FAILURE || !(*line = ft_strnew(0)))
+	gno[fd] = ft_read(fd, gno[fd]);
+	if (gno[fd].i == FAILURE || !(*line = ft_strnew(0)))
 		return (FAILURE);
-	while (gnl[fd].size)
+	while (gno[fd].size)
 	{
-		if (gnl[fd].buff[gnl[fd].i] == '\n')
+		if (gno[fd].buff[gno[fd].i] == offset)
 		{
-			++gnl[fd].i;
+			++gno[fd].i;
 			return (SUCCESS);
 		}
-		gnl[fd].i = read_line(line, gnl[fd]);
-		gnl[fd] = ft_realloc(fd, gnl[fd]);
-		if (gnl[fd].i == -1)
+		gno[fd].i = build_line(line, gno[fd], offset);
+		gno[fd] = ft_read(fd, gno[fd]);
+		if (gno[fd].i == FAILURE)
 			return (FAILURE);
 	}
 	if (**line)
 		return (SUCCESS);
 	return (EOFF);
+}
+
+int					get_next_line(int const fd, char **line)
+{
+	return (get_next_offset(fd, line, '\n'));
 }
