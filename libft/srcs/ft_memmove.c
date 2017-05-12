@@ -6,7 +6,7 @@
 /*   By: oukrifa <oukrifa@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/04/13 22:47:05 by oukrifa           #+#    #+#             */
-/*   Updated: 2017/04/14 17:49:35 by oukrifa          ###   ########.fr       */
+/*   Updated: 2017/05/12 01:15:15 by oukrifa          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,20 @@
 
 void	*ft_memmove(void *s1, const void *s2, size_t n)
 {
-	unsigned char	str[n];
+	unsigned char *dst_tmp;
+	unsigned char *src_tmp;
 
-	if (n < 134217728)
+	dst_tmp = dst;
+	src_tmp = (unsigned char*)src;
+	if (dst < src)
 	{
-		ft_memcpy(str, (unsigned char *)s2, n);
-		ft_memcpy((unsigned char *)s1, str, n);
-		return ((unsigned char *)s1);
+		while (len--)
+			*dst_tmp++ = *src_tmp++;
 	}
-	return (NULL);
-}
+	else
+	{
+		while (len--)
+			dst_tmp[len] = src_tmp[len];
+	}
+	return (dst);
+	}
