@@ -6,7 +6,7 @@
 #    By: oukrifa <oukrifa@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2017/04/12 17:16:41 by oukrifa           #+#    #+#              #
-#    Updated: 2017/04/25 13:06:22 by oukrifa          ###   ########.fr        #
+#    Updated: 2017/05/12 01:32:35 by oukrifa          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -60,8 +60,10 @@ INC = $(addprefix -I, $(INC_PATH))
 all: $(NAME)
 
 $(NAME): $(OBJ)
+	@echo "Compilation .o :\033[36m OK\033[0m"
 	@ar rc $(NAME) $(OBJ)
 	@ranlib $(NAME)
+	@echo "Building libft.a :\033[36m OK\033[0m"
 
 $(OBJ_PATH)%.o: $(SRC_PATH)%.c
 	@mkdir -p $(OBJ_PATH)
@@ -69,9 +71,11 @@ $(OBJ_PATH)%.o: $(SRC_PATH)%.c
 
 clean:
 	@rm -f $(OBJ)
+	@echo "Deleting .o :\033[31m OK\033[0m"
 
 fclean: clean
 	@rm -f $(NAME)
+	@echo "Deleting :\033[31m $(NAME)\033[0m"
 
 re: fclean all
 
